@@ -47,7 +47,9 @@ public class Main extends JavaPlugin implements Listener {
 			sender.sendMessage(ChatColor.RED + "Alleen spelers kunnen dit commando uitvoeren!");
 			return false;
 		}
+		
 		Player p = (Player) sender;
+		
 		if(p.hasPermission("GHGA.Staff")) {
 		if (args.length == 0) {
 		      p.sendMessage(prefix + "Fout gebruik van commando. Moet zijn: /anticurse <command> [optional arguments]");
