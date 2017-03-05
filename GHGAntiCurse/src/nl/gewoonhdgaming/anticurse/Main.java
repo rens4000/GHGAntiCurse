@@ -55,6 +55,7 @@ public class Main extends JavaPlugin implements Listener {
 		      p.sendMessage(prefix + "Fout gebruik van commando. Moet zijn: /anticurse <command> [optional arguments]");
 		      p.sendMessage(prefix + "Commands: ");
 		      p.sendMessage(prefix + "Clear: Verwijder target van warn lvl's");
+		      p.sendMessage(prefix + "Check: Check iemands scheld lvl");
 		  } else if(args.length >= 1) {
 			  Player target = getServer().getPlayer(args[1]);
 			  if(args[0].equalsIgnoreCase("clear")) {
