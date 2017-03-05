@@ -1,16 +1,29 @@
 package nl.gewoonhdgaming.anticurse;
 
+import java.util.ArrayList;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import nl.gewoonhdgaming.anticurse.events.PlayerChatEvent;
+import net.minecraft.server.v1_10_R1.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_10_R1.PacketPlayOutTitle;
+import net.minecraft.server.v1_10_R1.PacketPlayOutTitle.EnumTitleAction;
 
-public class Main extends JavaPlugin {
+public class Main extends JavaPlugin implements Listener {
+	
+	public ArrayList<Player> lvl1 = new ArrayList<Player>();
+	public ArrayList<Player> lvl2 = new ArrayList<Player>();
+	public String prefix = ChatColor.AQUA + "GHG" + ChatColor.RED + "AntiCurse > > " + ChatColor.WHITE;
 
 	public void onEnable() {
 		ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
@@ -18,7 +31,7 @@ public class Main extends JavaPlugin {
 		console.sendMessage(ChatColor.GREEN + "Het AntiCurse systeem wordt geladen!");
 		getConfig().options().copyDefaults(true);
 		saveConfig();
-		Bukkit.getServer().getPluginManager().registerEvents(new PlayerChatEvent(), this);
+		getServer().getPluginManager().registerEvents(this, this);
 		console.sendMessage(ChatColor.AQUA + "Het AntiCurse systeem is succesvol geladen!");
 	}
 	
@@ -37,21 +50,60 @@ public class Main extends JavaPlugin {
 		Player p = (Player) sender;
 		if(p.hasPermission("GHGA.Staff")) {
 		if (args.length == 0) {
-		      p.sendMessage(PlayerChatEvent.prefix + "Fout gebruik van commando. Moet zijn: /anticurse <command> [optional arguments]");
-		      p.sendMessage(PlayerChatEvent.prefix + "Commands: ");
-		      p.sendMessage(PlayerChatEvent.prefix + "Clear: Verwijder target van warn lvl's");
+		      p.sendMessage(prefix + "Fout gebruik van commando. Moet zijn: /anticurse <command> [optional arguments]");
+		      p.sendMessage(prefix + "Commands: ");
+		      p.sendMessage(prefix + "Clear: Verwijder target van warn lvl's");
 		  } else if(args.length >= 1) {
 			  Player target = getServer().getPlayer(args[1]);
 			  if(args[0].equalsIgnoreCase("clear")) {
+				  if(args[1] == null) {
+					  p.sendMessage(prefix + "FOUT GEBRUIK! Moet zijn: /anticurse clear <speler>");
+					  return false;
+				  }
 					  if(target == null) {
-						  p.sendMessage(PlayerChatEvent.prefix + "Target is niet online of bestaat niet");
+						  p.sendMessage(prefix + "Target is niet online of bestaat niet");
+						  return false;
 					  } else {
-						  if(PlayerChatEvent.lvl1.contains(target)) PlayerChatEvent.lvl1.remove(target);
-						  if(PlayerChatEvent.lvl2.contains(target)) PlayerChatEvent.lvl2.remove(target);						  
+						  if(lvl1.contains(target)) lvl1.remove(target);
+						  if(lvl2.contains(target)) lvl2.remove(target);						  
 					  }
 			  }
 		  }
 	}
 		return false;
+
 }
+	@SuppressWarnings("deprecation")
+	@EventHandler
+	public void onPlayerChat(PlayerChatEvent e) {
+		for (String word : e.getMessage().split(" ")) {
+			if (getConfig().getStringList("badwords").contains(word)) {
+				e.setCancelled(true);				
+				if((!lvl1.contains(e.getPlayer()) && (!lvl2.contains(e.getPlayer())))) {
+					getLogger().info("Zet naar lvl 1");
+					lvl1.add(e.getPlayer());
+                    PacketPlayOutTitle title = new PacketPlayOutTitle(EnumTitleAction.TITLE, ChatSerializer.a("{\"text\":\"Schelden is niet toegestaan!\"}"), 20, 40, 20);
+                    PacketPlayOutTitle subtitle = new PacketPlayOutTitle(EnumTitleAction.SUBTITLE, ChatSerializer.a("{\"text\":\"Je hebt nu 1 waarschuwing!\"}"), 20, 40, 20);
+                    ((CraftPlayer) e.getPlayer()).getHandle().playerConnection.sendPacket(title);
+                    ((CraftPlayer) e.getPlayer()).getHandle().playerConnection.sendPacket(subtitle);
+                    e.getPlayer().sendMessage(prefix + "Schelden is niet toegestaan! Je hebt nu 1 waarschuwing!");
+				} else
+				if(lvl1.contains(e.getPlayer())) {
+					getLogger().info("Zet naar lvl 2");
+					lvl1.remove(e.getPlayer());
+					lvl2.add(e.getPlayer());
+					PacketPlayOutTitle title = new PacketPlayOutTitle(EnumTitleAction.TITLE, ChatSerializer.a("{\"text\":\"Schelden is niet toegestaan!\"}"), 20, 40, 20);
+                    PacketPlayOutTitle subtitle = new PacketPlayOutTitle(EnumTitleAction.SUBTITLE, ChatSerializer.a("{\"text\":\"Je hebt nu 2 waarschuwingen!\"}"), 20, 40, 20);
+                    ((CraftPlayer) e.getPlayer()).getHandle().playerConnection.sendPacket(title);
+                    ((CraftPlayer) e.getPlayer()).getHandle().playerConnection.sendPacket(subtitle);
+                    e.getPlayer().sendMessage(prefix + "Schelden is niet toegestaan! Je hebt nu 2 waarschuwingen! Scheld je nog 1 keer wordt je gekickt!");
+				} else
+				if(lvl2.contains(e.getPlayer())) {
+					getLogger().info("Zet naar lvl 3");
+					e.getPlayer().kickPlayer(ChatColor.RED + "Schelden is niet toegestaan!");
+					lvl2.remove(e.getPlayer());
+				}
+			}
+		}
+	}
 }
