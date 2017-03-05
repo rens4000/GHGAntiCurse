@@ -56,6 +56,7 @@ public class Main extends JavaPlugin implements Listener {
 		  } else if(args.length >= 1) {
 			  Player target = getServer().getPlayer(args[1]);
 			  if(args[0].equalsIgnoreCase("clear")) {
+				  
 				  if(args[1] == null) {
 					  p.sendMessage(prefix + "FOUT GEBRUIK! Moet zijn: /anticurse clear <speler>");
 					  return false;
