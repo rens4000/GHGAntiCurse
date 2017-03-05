@@ -16,10 +16,10 @@ import nl.gewoonhdgaming.anticurse.Main;
 
 public class PlayerChatEvent implements Listener {
 	
-	public String prefix = ChatColor.AQUA + "GHG" + ChatColor.RED + "Anticurse " + ChatColor.WHITE; 
+	public static String prefix = ChatColor.AQUA + "GHG" + ChatColor.RED + "Anticurse " + ChatColor.WHITE; 
 	
-	public ArrayList<Player> lvl1 = new ArrayList<Player>();
-	public ArrayList<Player> lvl2= new ArrayList<Player>();
+	public static ArrayList<Player> lvl1 = new ArrayList<Player>();
+	public static ArrayList<Player> lvl2= new ArrayList<Player>();
 	
 	private Main plugin;
 	

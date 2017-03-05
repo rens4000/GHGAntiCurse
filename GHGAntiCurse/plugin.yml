@@ -1,0 +1,8 @@
+name: GHGAntiCurse
+version: 1.0
+authors: [rens4000, boykev, Jasperdoit]
+main: nl.gewoonhdgaming.anticurse.Main
+commands:
+  anticurse:
+    description: Het algemene anticurse commando!
+    aliases: [ac, scheld]
